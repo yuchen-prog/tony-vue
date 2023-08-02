@@ -38,6 +38,32 @@ describe('effect', () => {
       expect(i).toBe(1);
       user.len = 30;
       expect(i).toBe(1);
+    }),
+
+    it('cleanup', () => {
+      // data
+      //  └── ok
+      //      └── effectFn
+      //  └── text
+      //      └── effectFn
+      const obj = reactive({ ok: true, text: 'hello' });
+      let text = ''
+      let i = 0;
+      effect(() => {
+        text = obj.ok ? obj.text : 'not'
+        i++
+      });
+      expect(text).toBe('hello')
+      // 触发一次trigger
+      obj.ok = false;
+      expect(i).toBe(2)
+      expect(text).toBe('not')
+
+      obj.text = 'hello world';
+      // 此时应该不触发依赖
+      expect(text).toBe('not');
+      expect(i).toBe(2)
+
     })
 
 })
