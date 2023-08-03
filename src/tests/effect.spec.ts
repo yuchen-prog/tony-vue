@@ -88,6 +88,11 @@ describe('effect', () => {
       obj.foo = false;
       expect(_out).toBe(2);
       expect(_in).toBe(2);
+    }),
+
+    it("endless circle", () => {
+      const obj = reactive({foo: 1})
+      effect(() => obj.foo++)
     })
 
 })

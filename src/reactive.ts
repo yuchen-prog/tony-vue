@@ -1,7 +1,4 @@
-import { activeEffect, effect } from "./effect";
-
-// 设计一个bucket用于存effectFn
-let bucket = new WeakMap();
+import { track, trigger } from "./effect";
 
 /**
  * 
@@ -29,28 +26,4 @@ export function reactive(obj) {
             return true
         }
     })
-}
-
-function track(target, key) {
-    if (!activeEffect) return target[key]
-    let depsMap = bucket.get(target as any)
-    if (!depsMap) {
-        bucket.set(target as any, (depsMap = new Map()));
-    }
-    let deps = depsMap.get(key);
-    if (!deps) {
-        depsMap.set(key, (deps = new Set()));
-    }
-    deps.add(activeEffect)
-    // 反向收集
-    activeEffect.deps.push(deps);
-}
-
-function trigger(target, key) {
-    const depsMap = bucket.get(target);
-    if (!depsMap) return true;
-    const deps = depsMap.get(key);
-
-    const effectsToRun = new Set(deps)
-    effectsToRun.forEach((fn: any) => fn.run());
 }
