@@ -52,5 +52,5 @@ function trigger(target, key) {
     const deps = depsMap.get(key);
 
     const effectsToRun = new Set(deps)
-    effectsToRun.forEach((fn: any) => fn());
+    effectsToRun.forEach((fn: any) => fn.run());
 }
