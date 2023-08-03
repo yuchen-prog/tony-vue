@@ -64,6 +64,30 @@ describe('effect', () => {
       expect(text).toBe('not');
       expect(i).toBe(2)
 
+    }),
+
+    it("effect stack", () => {
+      // 解决嵌套的effect
+      let _out = 0
+      let _in = 0
+      let tmp1, tmp2
+      const obj = reactive({ foo: true, bar: true });
+      effect(() => {
+        _out++;
+        effect(() => {
+          _in++;
+          tmp1 = obj.bar
+        });
+        tmp2 = obj.foo
+      })
+
+      expect(_out).toBe(1);
+      expect(_in).toBe(1);
+
+      // 希望当修改 obj.foo 时会触发 effectFn1 执行。由于effectFn2 嵌套在 effectFn1 里，所以会间接触发 effectFn2 执行
+      obj.foo = false;
+      expect(_out).toBe(2);
+      expect(_in).toBe(2);
     })
 
 })
