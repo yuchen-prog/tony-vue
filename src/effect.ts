@@ -9,19 +9,22 @@ class ReactiveEffect {
     private _fn: any
     public deps: any
     public _uuid: string
-    constructor(fn: any) {
+    private options: any
+    constructor(fn: any, options) {
         this._fn = fn;
         this.deps = [];
         this._uuid = uuidv4();
+        this.options = options;
     }
 
     run() {
         this.cleanup();
         activeEffect = this;
         effectStack.push(this);
-        this._fn()
+        const res = this._fn()
         effectStack.pop();
         activeEffect = effectStack[effectStack.length - 1]
+        return res;
     }
 
     cleanup() {
@@ -34,9 +37,10 @@ class ReactiveEffect {
 
 
 // 新添加一个deps属性，用来存所有与该副作用函数相关联的依赖集合
-export function effect(fn) {
-    const reactiveEffect = new ReactiveEffect(fn);
-    reactiveEffect.run();
+export function effect(fn, options = {}) {
+    const reactiveEffect = new ReactiveEffect(fn, options);
+    reactiveEffect.run()
+    return reactiveEffect.run.bind(reactiveEffect);
 }
 
 export function track(target, key) {
@@ -63,7 +67,13 @@ export function trigger(target, key) {
     deps && deps.forEach((effect) => {
         if (!activeEffect || effect._uuid !== activeEffect._uuid) {
             effectsToRun.add(effect)
-        }   
+        }
     })
-    effectsToRun.forEach((fn: any) => fn.run());
+    effectsToRun.forEach((fn: any) => {
+        if (fn.options.scheduler) {
+            fn.options.scheduler();
+        } else {
+            fn.run();
+        }
+    });
 }
