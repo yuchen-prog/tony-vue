@@ -10,7 +10,7 @@ class ReactiveEffect {
     public deps: any
     public _uuid: string
     private options: any
-    constructor(fn: any, options) {
+    constructor(fn: any, options?) {
         this._fn = fn;
         this.deps = [];
         this._uuid = uuidv4();
@@ -71,7 +71,7 @@ export function trigger(target, key) {
     })
     effectsToRun.forEach((fn: any) => {
         if (fn.options.scheduler) {
-            fn.options.scheduler();
+            fn.options.scheduler(fn);
         } else {
             fn.run();
         }

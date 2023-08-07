@@ -131,4 +131,43 @@ describe('effect', () => {
     // // should have run
     expect(dummy).toBe(2)
   })
+
+  it('micro queue', () => {
+    const obj = reactive({ foo: 1 })
+    let i = 0;
+    const jobQueue = new Set();
+    let isFlushing = false;
+    const p = Promise.resolve();
+
+    function flushJob() {
+      if (isFlushing) return;
+      isFlushing = true;
+      p.then(() => {
+        jobQueue.forEach((job) =>
+          job.run()
+        )
+      }).finally(() => {
+        isFlushing = false;
+      })
+    }
+
+
+    effect(() => {
+      console.log(obj.foo)
+      i++
+    }, {
+      scheduler(fn) {
+        jobQueue.add(fn);
+        flushJob();
+      }
+    })
+    obj.foo++;
+    obj.foo++;
+    obj.foo++;
+    // 在下一个宏任务下判断
+    setTimeout(() => {
+      expect(i).toBe(2)
+    }, 0);
+
+  })
 })
