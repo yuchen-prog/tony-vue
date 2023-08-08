@@ -1,15 +1,24 @@
 import { effect } from "./effect";
 
 export function computed(getter) {
-     const effectFn = effect(getter, {
-        lazy: true
-     })
-
-     const res = {
-        get value() {
-            return effectFn();
+    let dirty = true;
+    let cacheVal;
+    const effectFn = effect(getter, {
+        lazy: true,
+        scheduler() {
+            dirty = true
         }
-     }
+    })
 
-     return res;
+    const res = {
+        get value() {
+            if (dirty) {
+                cacheVal = effectFn();
+                dirty = false;
+            }
+            return cacheVal
+        }
+    }
+
+    return res;
 }
