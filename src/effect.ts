@@ -37,9 +37,11 @@ class ReactiveEffect {
 
 
 // 新添加一个deps属性，用来存所有与该副作用函数相关联的依赖集合
-export function effect(fn, options = {}) {
+export function effect(fn, options: any = {}) {
     const reactiveEffect = new ReactiveEffect(fn, options);
-    reactiveEffect.run()
+    if (!options.lazy) {
+        reactiveEffect.run()
+    }
     return reactiveEffect.run.bind(reactiveEffect);
 }
 
