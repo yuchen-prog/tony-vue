@@ -1,4 +1,4 @@
-import { effect } from "./effect";
+import { effect, track, trigger } from "./effect";
 
 export function computed(getter) {
     let dirty = true;
@@ -6,7 +6,9 @@ export function computed(getter) {
     const effectFn = effect(getter, {
         lazy: true,
         scheduler() {
-            dirty = true
+            dirty = true;
+            // trigger
+            trigger(res, 'value')
         }
     })
 
@@ -15,6 +17,7 @@ export function computed(getter) {
             if (dirty) {
                 cacheVal = effectFn();
                 dirty = false;
+                track(res, 'value')
             }
             return cacheVal
         }
