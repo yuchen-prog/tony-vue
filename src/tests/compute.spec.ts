@@ -1,5 +1,6 @@
 import { reactive } from "../reactive"
 import { computed } from "../computed"
+import { effect } from "../effect"
 
 describe('computed', () => {
     it('should return updated value', () => {
@@ -14,6 +15,30 @@ describe('computed', () => {
             const obj = reactive({ foo: 1, bar: 2 })
             const sumRes = computed(() => obj.foo + obj.bar)
             expect(sumRes.value).toBe(3);  // 3
+        }),
+
+        it('nested computed', () => {
+            const value = reactive({ foo: 1 })
+            const cValue = computed(() => value.foo)
+            let val = 0
+            effect(() => {
+                val = cValue.value
+            })
+            expect(val).toBe(1)
+            value.foo++;
+            expect(cValue.value).toBe(2)
+            expect(val).toBe(2)
+        }),
+
+        it('should work when chained', () => {
+            const value = reactive({ foo: 0 })
+            const c1 = computed(() => value.foo)
+            const c2 = computed(() => c1.value + 1)
+            expect(c2.value).toBe(1)
+            expect(c1.value).toBe(0)
+            value.foo++
+            expect(c2.value).toBe(2)
+            expect(c1.value).toBe(1)
         })
 
 }) 
